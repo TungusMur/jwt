@@ -10,6 +10,7 @@ export const refreshToken = () =>
     fingerprint: "fingerprint",
     refreshToken: localStorage.refreshToken,
   });
+
 export const registration = ({
   username,
   password,
@@ -22,6 +23,7 @@ export const registration = ({
     password,
     fingerprint: "fingerprint",
   });
+
 export const authorization = ({
   username,
   password,
@@ -34,33 +36,3 @@ export const authorization = ({
     password,
     fingerprint: "fingerprint",
   });
-
-axiosPrivate.interceptors.request.use(
-  async (config) => {
-    const newConfig = { ...config };
-    const accessToken =
-      localStorage.accessToken &&
-      JSON.parse(window.atob(localStorage.accessToken.split(".")[1]));
-    if (accessToken && accessToken.exp < Date.now() / 1000) {
-      try {
-        const { data } = await refreshToken();
-        [localStorage.accessToken, localStorage.refreshToken] = [
-          data.accessToken,
-          data.refreshToken,
-        ];
-        newConfig.headers.Authorization = `Bearer ${localStorage.refreshToken}`;
-      } catch (error) {
-        throw error;
-      }
-    }
-
-    return newConfig;
-  },
-  null,
-  {
-    runWhen: (config) =>
-      !["auth/refresh", "auth/login", "auth/register"].includes(
-        config.url as string
-      ),
-  }
-);
